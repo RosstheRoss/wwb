@@ -27,6 +27,10 @@ fn main() {
         .target(Target::Stdout)
         .init();
 
+    game_loop();
+}
+
+fn game_loop() {
     let game = Arc::new(Mutex::new(Game::default()));
 
     // Set up Ctrl-C handler to print the game state before exiting.
@@ -73,7 +77,8 @@ fn main() {
         if current_space == BOARD_SIZE + 1 {
             log::error!(
                 "Player {} has reached the Finish space and won on turn {}!",
-                current_player_number, game.turn_count
+                current_player_number,
+                game.turn_count
             );
             break;
         }
@@ -100,10 +105,7 @@ fn main() {
 
         for player in game.players.iter_mut() {
             if player.current_space == current_space && player.current_space != 0 {
-                    log::debug!(
-                        "Two players collided on space {}!",
-                        current_space
-                    );
+                log::debug!("Two players collided on space {}!", current_space);
                 player.current_space = 0;
                 current_space = 0;
                 collision = true;
