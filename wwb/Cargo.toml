@@ -1,0 +1,11 @@
+[package]
+name = "wwb"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.39"
+ctrlc = "3.4.5"
+env_logger = "0.11.5"
+fastrand = "2.3.0"
+log = "0.4.22"
