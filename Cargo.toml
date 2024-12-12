@@ -6,4 +6,4 @@ members = ["wwb"]
 [profile.release]
 strip = true
 lto = true
-panic = "abort"
+#panic = "abort"
