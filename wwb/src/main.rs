@@ -1,5 +1,6 @@
 use chrono::Local;
 use env_logger::{Builder, Env, Target};
+use locusts::introduce_locusts;
 use std::io::Write;
 use std::process::exit;
 use std::sync::{Arc, Mutex};
@@ -11,6 +12,7 @@ fn roll_d6() -> u8 {
 }
 
 fn main() {
+    introduce_locusts();
     let env = Env::new().filter_or("RUST_LOG", "info");
     // Create logger
     Builder::from_env(env)
