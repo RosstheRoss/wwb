@@ -1,18 +1,59 @@
+use bincode::config;
 use chrono::Local;
 use env_logger::{Builder, Env, Target};
 use locusts::introduce_locusts;
+use std::fs;
 use std::io::Write;
 use std::process::exit;
 use std::sync::{Arc, Mutex};
 use wwb::*;
+
+static BINCODE_COFNIG: config::Configuration = config::standard();
 
 /// Roll a d6 and return the result.
 fn roll_d6() -> u8 {
     fastrand::u8(1..=6)
 }
 
+/// Save the game state to a file.
+///
+/// Note: If there is no path, the game will not be saved.
+fn save_game(game: &Game, path: &str) {
+    if path.is_empty() {
+        return;
+    }
+    let serialized_game = bincode::encode_to_vec(game, BINCODE_COFNIG).unwrap();
+    fs::write(path, serialized_game).unwrap();
+}
+
+/// Load the game state from a file.
+/// Note: If there is no path, the game will not be loaded.
+fn load_game(path: &str) -> Game {
+    if path.is_empty() {
+        return Game::default();
+    }
+    match fs::read(path) {
+        Ok(serialized_game) => {
+            let (game, _): (Game, usize) =
+                bincode::decode_from_slice(&serialized_game, BINCODE_COFNIG).unwrap();
+            game
+        }
+        Err(_) => {
+            Game::default()
+        }
+    }
+}
+
 fn main() {
     introduce_locusts();
+
+    let args: Vec<String> = std::env::args().collect();
+    let path = if args.len() > 1 {
+        args[1].clone()
+    } else {
+        "".to_string()
+    };
+
     let env = Env::new().filter_or("RUST_LOG", "info");
     // Create logger
     Builder::from_env(env)
@@ -27,18 +68,20 @@ fn main() {
         .target(Target::Stdout)
         .init();
 
-    game_loop();
+    game_loop(path);
 }
 
-fn game_loop() {
-    let game = Arc::new(Mutex::new(Game::default()));
+fn game_loop(path: String) {
+    let game = Arc::new(Mutex::new(load_game(&path)));
 
     // Set up Ctrl-C handler to print the game state before exiting.
     let game_clone = Arc::clone(&game);
+    let path_clone = path.clone();
     ctrlc::set_handler(move || {
         let game = game_clone.lock().unwrap();
         println!("Game state at exit:");
         log::error!("{:#?}", *game);
+        save_game(&game, &path_clone);
         exit(0);
     })
     .expect("Error setting Ctrl-C handler");
@@ -99,6 +142,7 @@ fn game_loop() {
                     .join(",")
             );
             game.players[current_player_number].high_score = current_space;
+            save_game(&game, &path);
         }
 
         let mut collision: bool = false;
