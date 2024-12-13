@@ -1,6 +1,6 @@
 # W.W.B.
 
-A Rust simulatiion of the World's Worst Boardgame
+A Rust simulation of the World's Worst Boardgame (W.W.B.) by Rich Hutnik.
 
 ## Disclaimer
 
