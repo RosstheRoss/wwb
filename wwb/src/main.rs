@@ -8,22 +8,11 @@ use std::process::exit;
 use std::sync::{Arc, Mutex};
 use wwb::*;
 
-static BINCODE_COFNIG: config::Configuration = config::standard();
+static BINCODE_CONFIG: config::Configuration = config::standard();
 
 /// Roll a d6 and return the result.
 fn roll_d6() -> u8 {
     fastrand::u8(1..=6)
-}
-
-/// Save the game state to a file.
-///
-/// Note: If there is no path, the game will not be saved.
-fn save_game(game: &Game, path: &str) {
-    if path.is_empty() {
-        return;
-    }
-    let serialized_game = bincode::encode_to_vec(game, BINCODE_COFNIG).unwrap();
-    fs::write(path, serialized_game).unwrap();
 }
 
 /// Load the game state from a file.
@@ -35,13 +24,22 @@ fn load_game(path: &str) -> Game {
     match fs::read(path) {
         Ok(serialized_game) => {
             let (game, _): (Game, usize) =
-                bincode::decode_from_slice(&serialized_game, BINCODE_COFNIG).unwrap();
+                bincode::decode_from_slice(&serialized_game, BINCODE_CONFIG).unwrap();
             game
         }
-        Err(_) => {
-            Game::default()
-        }
+        Err(_) => Game::default(),
     }
+}
+
+/// Save the game state to a file.
+///
+/// Note: If there is no path, the game will not be saved.
+fn save_game(game: &Game, path: &str) {
+    if path.is_empty() {
+        return;
+    }
+    let serialized_game = bincode::encode_to_vec(game, BINCODE_CONFIG).unwrap();
+    fs::write(path, serialized_game).unwrap();
 }
 
 fn main() {
@@ -68,10 +66,6 @@ fn main() {
         .target(Target::Stdout)
         .init();
 
-    game_loop(path);
-}
-
-fn game_loop(path: String) {
     let game = Arc::new(Mutex::new(load_game(&path)));
 
     // Set up Ctrl-C handler to print the game state before exiting.
@@ -86,22 +80,27 @@ fn game_loop(path: String) {
     })
     .expect("Error setting Ctrl-C handler");
 
+    game_loop(&game, &path);
+}
+
+/// ### Game loop:
+/// 1. Player rolls d6
+/// 2. If not 5, next player's turn
+/// 3. If 5, advance one space
+/// 4. If players are on the same space that is NOT 0, move BOTH back to space 0
+/// 5. If there was no collision, roll d6 again
+/// 6. If not 5, go back to space 0
+/// 7. If 5 again, nothing happens
+/// 8. Next player's turn
+///
+fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
     loop {
         let mut game = game.lock().unwrap();
         game.turn_count += 1;
-        // Game loop:
-        // Player rolls d6
-        // If not 5, next player's turn
-        // If 5, advance one space
-        // If players are on the same space that is NOT 0, move BOTH back to space 0
-        // If there was no collision, roll d6 again
-        // If not 5, go back to space 0
-        // If 5 again, nothing happens
-        // Next player's turn
 
         // This will probably not work properly when the turn count goes above 2^32 on a 32-bit machine and 3^64 on a 64-bit machine.
         let current_player_number = game.turn_count as usize % PLAYER_COUNT;
-        let mut current_space = game.players[current_player_number].current_space;
+        let mut current_space: u16 = game.players[current_player_number].current_space;
 
         let roll = roll_d6();
         log::debug!(

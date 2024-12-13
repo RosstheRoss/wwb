@@ -28,7 +28,9 @@ A simulation of WWB has never been done either, the longest known one crashed at
 
 ### My current record
 
-Using this program, a computer managed to go at least 15 trillion turns overnight with a high score of 17. The game runs about 150-200 million turns a second on my Ryzen 9 5900X running Arch Linux on WSL. Running it on Windows on the same machine was about the same.
+Using this program, a computer managed to go at least 15 trillion turns overnight with a high score of 17. The game runs about 150-200 million turns a second on my AMD Ryzen 9 5900X running Arch Linux on WSL. Running it on Windows on the same machine was about the same.
+
+This program is single-threaded as the collision detection mechanic requires the two threads to essentially take turns as well as the fact that the game state is shared between the two threads. Performance gains are likely minimal and might even be negative, though I have not tested this.
 
 #### Exact info
 
