@@ -92,12 +92,12 @@ fn game_loop(path: String) {
         // Game loop:
         // Player rolls d6
         // If not 5, next player's turn
-        // If 5, roll d6 again
-        // If not 5, go back to space 0
-        // If 5 again, go ahead a space
+        // If 5, advance one space
         // If players are on the same space that is NOT 0, move BOTH back to space 0
+        // If there was no collision, roll d6 again
+        // If not 5, go back to space 0
+        // If 5 again, nothing happens
         // Next player's turn
-        // Roll the dice
 
         // This will probably not work properly when the turn count goes above 2^32 on a 32-bit machine and 3^64 on a 64-bit machine.
         let current_player_number = game.turn_count as usize % PLAYER_COUNT;
