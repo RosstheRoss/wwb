@@ -141,7 +141,7 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
                     .join(",")
             );
             game.players[current_player_number].high_score = current_space;
-            save_game(&game, &path);
+            save_game(&game, path);
         }
 
         let mut collision: bool = false;
