@@ -2,6 +2,8 @@ use bincode::{Decode, Encode};
 
 /// WWB is a 2-player game at heart. Hardcode 2 players only so no one else has to suffer
 pub const PLAYER_COUNT: usize = 2;
+/// By default, the game board is 100 cards, not including the start and finish spaces.
+/// An alternative rule would be to set this to be 1000, but since the game has never been finished at 100, it's not worth it.
 pub const BOARD_SIZE: u16 = 100;
 
 #[derive(Encode, Decode, Debug, Default, PartialEq)]
