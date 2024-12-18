@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Make sure that the program is up to date.
+cargo build --release
+
+# Run the program in parallel and make sure the priority is low.
+seq 1 "$(nproc)" | xargs -P 0 -I _ sh -c "nice -n 19 ./target/release/wwb game._.bin | tee -ai output._.log"

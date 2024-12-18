@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cargo build --release
+
+nice -n 19 ./target/release/wwb game.bin | tee -ai output.log

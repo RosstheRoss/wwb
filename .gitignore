@@ -21,4 +21,7 @@ Cargo.lock
 #.idea/
 
 output.log
+output.*.log
+
 game.bin
+game.*.bin
