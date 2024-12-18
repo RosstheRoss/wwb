@@ -73,7 +73,6 @@ fn main() {
     let path_clone = path.clone();
     ctrlc::set_handler(move || {
         let game = game_clone.lock().unwrap();
-        println!("Game state at exit:");
         log::error!("{:#?}", *game);
         save_game(&game, &path_clone);
         exit(0);
