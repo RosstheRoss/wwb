@@ -60,6 +60,23 @@ To run the project, run:
 
 where `savefile` is an optional argument that specifies the file to save the game state to. If no savefile is provided, the game will start from the beginning and **NOT SAVE**.
 
+#### Using the contrib file
+
+Alternatively, you can use the following scripts to run the game:
+
+```sh	
+./contrib/run-one
+```
+Builds and runs one instance of the game.
+
+```sh	
+./contrib/run-in-parallel
+```
+Builds the program and runs one instance for every core on your machine.
+
+These are sh scripts, Windows users will need to use WSL or a similar tool to run these scripts.
+
+
 ## License
 
 This project is licensed under the 0BSD license. See the [LICENSE](LICENSE) file for details.
