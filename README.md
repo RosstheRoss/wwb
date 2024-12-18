@@ -1,4 +1,4 @@
-# W.W.B.
+# W.W.B
 
 A Rust simulation of the World's Worst Boardgame (W.W.B.) by Rich Hutnik.
 
@@ -64,18 +64,19 @@ where `savefile` is an optional argument that specifies the file to save the gam
 
 Alternatively, you can use the following scripts to run the game:
 
-```sh	
+```sh
 ./contrib/run-one
 ```
+
 Builds and runs one instance of the game.
 
-```sh	
+```sh
 ./contrib/run-in-parallel
 ```
+
 Builds the program and runs one instance for every core on your machine.
 
 These are sh scripts, Windows users will need to use WSL or a similar tool to run these scripts.
-
 
 ## License
 
