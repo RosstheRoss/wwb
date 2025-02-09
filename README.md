@@ -1,6 +1,6 @@
 # W.W.B
 
-A Rust simulation of the World's Worst Boardgame (W.W.B.) by Rich Hutnik.
+A Rust simulation of the World's Worst Boardgame (W.W.B) by Rich Hutnik.
 
 ## Disclaimer
 
@@ -8,7 +8,7 @@ I am not affiliated with Rich Hutnik or the World's Worst Boardgame in any way. 
 
 ## What is W.W.B.?
 
-[W.W.B.](https://boardgamegeek.com/boardgame/99918/wwb) is a "game" designed in 2011 by Rich Hutnik. It is a two-player game that is meant to be immensely frustrating and impossible to actually finish. The "board" is 102 cards, "Start", "Finish", and the numbers 1-100.
+[W.W.B](https://boardgamegeek.com/boardgame/99918/wwb) is a "game" designed in 2011 by Rich Hutnik. It is a two-player game that is meant to be immensely frustrating and impossible to actually finish. The "board" is 102 cards, "Start", "Finish", and the numbers 1-100.
 
 The game loop is as follows:
 
@@ -24,11 +24,11 @@ The game loop is as follows:
 ## Why?
 
 I wanted to learn Rust and this seemed like a fun project to work on.
-A simulation of WWB has never been done either, the longest known one crashed at about 50 trillion turns with a high score of 17.
+A completed simulation of WWB has never been done either, the longest known one crashed at about 50 trillion turns with a high score of 17.
 
 ### My current record
 
-Using this program, a computer managed to go at least 15 trillion turns overnight with a high score of 17. The game runs about 150-200 million turns a second* on my AMD Ryzen 9 5900X running Arch Linux on WSL. Running it on Windows on the same machine was about the same.
+Using this program, a computer managed to go at least 100 trillion turns overnight with a high score of 17. The game runs about 150-200 million turns a second* on my AMD Ryzen 9 5900X running Arch Linux on WSL. Running it on Windows on the same machine was about the same.
 
 \* *This program relies very heavily on single-threaded CPU performance, and performance will depend on your CPU. A 2011 Mac Mini only runs about 25 million turns a second, for example; a Raspberry Pi 4 runs about 19 million turns a second.*
 
@@ -36,7 +36,7 @@ This program is single-threaded as the collision detection mechanic requires the
 
 #### Exact info
 
-The exact information of the game was on turn 19,097,444,399,063 Player 0 had a top score of 17 while Player 1 had a top score of 17.
+The exact information of the game was on turn 114,022,500,564,116 Player 0 had a top score of 17 while Player 1 also had a top score of 17.
 
 ## Usage
 
