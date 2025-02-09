@@ -76,7 +76,7 @@ Builds and runs one instance of the game.
 
 Builds the program and runs one instance for every core on your machine.
 
-These are sh scripts, Windows users will need to use WSL or a similar tool to run these scripts.
+These are shell scripts, Windows users will need to use WSL or something like MSYS2 to run these scripts.
 
 ## License
 
