@@ -42,6 +42,20 @@ fn save_game(game: &Game, path: &str) {
     fs::write(path, serialized_game).unwrap();
 }
 
+/// This unholy abomination is used to turn a number like 10000 to "10,000".
+/// Thank you, random person on StackOverflow.
+fn number_to_pretty_string(number: u128) -> String {
+    number
+        .to_string()
+        .as_bytes()
+        .rchunks(3)
+        .rev()
+        .map(std::str::from_utf8)
+        .collect::<Result<Vec<&str>, _>>()
+        .unwrap()
+        .join(",")
+}
+
 fn main() {
     introduce_locusts();
 
@@ -106,7 +120,7 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
             "Player {} rolled a {} on turn {} from space {}",
             current_player_number,
             roll,
-            game.turn_count,
+            number_to_pretty_string(game.turn_count),
             current_space
         );
 
@@ -119,7 +133,7 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
             log::error!(
                 "Player {} has reached the Finish space and won on turn {}!",
                 current_player_number,
-                game.turn_count
+                number_to_pretty_string(game.turn_count)
             );
             break;
         }
@@ -129,15 +143,7 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
                 "Player {} has a new high score of {} on turn {}",
                 current_player_number,
                 current_space,
-                game.turn_count
-                    .to_string()
-                    .as_bytes()
-                    .rchunks(3)
-                    .rev()
-                    .map(std::str::from_utf8)
-                    .collect::<Result<Vec<&str>, _>>()
-                    .unwrap()
-                    .join(",")
+                number_to_pretty_string(game.turn_count)
             );
             game.players[current_player_number].high_score = current_space;
             save_game(&game, path);
@@ -160,7 +166,7 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
                 log::debug!(
                     "Player {} rolled a 5 again on turn {} gets to stay on space {}",
                     current_player_number,
-                    game.turn_count,
+                    number_to_pretty_string(game.turn_count),
                     current_space
                 );
             } else {
@@ -177,7 +183,7 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
         log::debug!(
             "Player {} ends turn {} on space {}",
             current_player_number,
-            game.turn_count,
+            number_to_pretty_string(game.turn_count),
             current_space
         );
     }

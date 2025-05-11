@@ -28,7 +28,7 @@ A completed simulation of WWB has never been done either, the longest known one 
 
 ### My current record
 
-Using this program, a computer managed to go at least 100 trillion turns overnight with a high score of 17. The game runs about 150-200 million turns a second* on my AMD Ryzen 9 5900X running Arch Linux on WSL. Running it on Windows on the same machine was about the same.
+Using this program, a computer managed to go at least 100 trillion turns over several days with a high score of 17. The game runs about 150-200 million turns a second* on my AMD Ryzen 9 5900X running Arch Linux on WSL. Running it on Windows on the same machine was about the same.
 
 \* *This program relies heavily on single-threaded CPU performance, and performance will depend on your CPU. A 2011 Mac Mini only runs about 25 million turns a second, for example; a Raspberry Pi 4 runs about 19 million turns a second.*
 
