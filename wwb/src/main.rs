@@ -5,7 +5,10 @@ use locusts::introduce_locusts;
 use std::fs;
 use std::io::Write;
 use std::process::exit;
-use std::sync::{Arc, Mutex};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 use wwb::*;
 
 static BINCODE_CONFIG: config::Configuration = config::standard();
@@ -16,6 +19,7 @@ fn roll_d6() -> u8 {
 }
 
 /// Load the game state from a file.
+/// 
 /// Note: If there is no path, the game will not be loaded.
 fn load_game(path: &str) -> Game {
     if path.is_empty() {
@@ -60,14 +64,9 @@ fn main() {
     introduce_locusts();
 
     let args: Vec<String> = std::env::args().collect();
-    let path = if args.len() > 1 {
-        args[1].clone()
-    } else {
-        "".to_string()
-    };
+    let path = if args.len() > 1 { args[1].clone() } else { "".to_string() };
 
     let env = Env::new().filter_or("RUST_LOG", "info");
-    // Create logger
     Builder::from_env(env)
         .format(|buf, record| {
             writeln!(
@@ -80,20 +79,17 @@ fn main() {
         .target(Target::Stdout)
         .init();
 
-    let game = Arc::new(Mutex::new(load_game(&path)));
+    let mut game = load_game(&path);
 
-    // Set up Ctrl-C handler to print the game state before exiting.
-    let game_clone = Arc::clone(&game);
-    let path_clone = path.clone();
+    let save = Arc::new(AtomicBool::new(false));
+    let save_clone = Arc::clone(&save);
+
     ctrlc::set_handler(move || {
-        let game = game_clone.lock().unwrap();
-        log::error!("{:#?}", *game);
-        save_game(&game, &path_clone);
-        exit(0);
+        save_clone.store(true, Ordering::SeqCst);
     })
     .expect("Error setting Ctrl-C handler");
 
-    game_loop(&game, &path);
+    game_loop(&mut game, &path, &save);
 }
 
 /// ### Game loop:
@@ -106,14 +102,13 @@ fn main() {
 /// 7. If 5 again, nothing happens
 /// 8. Next player's turn
 ///
-fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
+fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
     loop {
-        let mut game = game.lock().unwrap();
         game.turn_count += 1;
 
         // This will probably not work properly when the turn count goes above 2^32 on a 32-bit machine and 3^64 on a 64-bit machine.
         let current_player_number = game.turn_count as usize % PLAYER_COUNT;
-        let mut current_space: u16 = game.players[current_player_number].current_space;
+        let mut current_space = game.players[current_player_number].current_space;
 
         let roll = roll_d6();
         log::debug!(
@@ -128,7 +123,6 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
             continue;
         }
         current_space += 1;
-        // Check if the player has won by reaching the space after the last space.
         if current_space == BOARD_SIZE + 1 {
             log::error!(
                 "Player {} has reached the Finish space and won on turn {}!",
@@ -146,11 +140,9 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
                 number_to_pretty_string(game.turn_count)
             );
             game.players[current_player_number].high_score = current_space;
-            save_game(&game, path);
         }
 
-        let mut collision: bool = false;
-
+        let mut collision = false;
         for player in game.players.iter_mut() {
             if player.current_space == current_space && player.current_space != 0 {
                 log::debug!("Two players collided on space {}!", current_space);
@@ -160,7 +152,6 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
             }
         }
 
-        // No need to run this logic if there was a collision and the current player is already at 0.
         if !collision {
             if roll_d6() == 5 {
                 log::debug!(
@@ -186,5 +177,11 @@ fn game_loop(game: &Arc<Mutex<Game>>, path: &str) {
             number_to_pretty_string(game.turn_count),
             current_space
         );
+
+        if do_save.load(Ordering::SeqCst) {
+            save_game(game, path);
+            log::error!("{:#?}", *game);
+            exit(0);
+        }
     }
 }

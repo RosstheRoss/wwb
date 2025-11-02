@@ -6,4 +6,7 @@ members = ["wwb"]
 [profile.release]
 strip = true
 lto = true
-#panic = "abort"
+
+[profile.profiling]
+inherits = "release"
+debug = true
