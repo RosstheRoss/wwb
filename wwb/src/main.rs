@@ -106,7 +106,7 @@ fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
     loop {
         game.turn_count += 1;
 
-        // This will probably not work properly when the turn count goes above 2^32 on a 32-bit machine and 3^64 on a 64-bit machine.
+        // This will probably not work properly when the turn count goes above 2^32 on a 32-bit machine and 2^64 on a 64-bit machine.
         let current_player_number = game.turn_count as usize % PLAYER_COUNT;
         let mut current_space = game.players[current_player_number].current_space;
 
@@ -140,6 +140,7 @@ fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
                 number_to_pretty_string(game.turn_count)
             );
             game.players[current_player_number].high_score = current_space;
+            save_game(game, path);
         }
 
         let mut collision = false;
