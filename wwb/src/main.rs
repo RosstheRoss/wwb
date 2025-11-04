@@ -19,7 +19,7 @@ fn roll_d6() -> u8 {
 }
 
 /// Load the game state from a file.
-/// 
+///
 /// Note: If there is no path, the game will not be loaded.
 fn load_game(path: &str) -> Game {
     if path.is_empty() {
@@ -64,7 +64,11 @@ fn main() {
     introduce_locusts();
 
     let args: Vec<String> = std::env::args().collect();
-    let path = if args.len() > 1 { args[1].clone() } else { "".to_string() };
+    let path = if args.len() > 1 {
+        args[1].clone()
+    } else {
+        "".to_string()
+    };
 
     let env = Env::new().filter_or("RUST_LOG", "info");
     Builder::from_env(env)
@@ -110,68 +114,58 @@ fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
         let current_player_number = game.turn_count as usize % PLAYER_COUNT;
         let mut current_space = game.players[current_player_number].current_space;
 
-        let roll = roll_d6();
-        log::debug!(
-            "Player {} rolled a {} on turn {} from space {}",
-            current_player_number,
-            roll,
-            number_to_pretty_string(game.turn_count),
-            current_space
-        );
-
-        if roll != 5 {
-            continue;
-        }
-        current_space += 1;
-        if current_space == BOARD_SIZE + 1 {
-            log::error!(
-                "Player {} has reached the Finish space and won on turn {}!",
-                current_player_number,
-                number_to_pretty_string(game.turn_count)
-            );
-            break;
-        }
-
-        if current_space > game.players[current_player_number].high_score {
-            log::info!(
-                "Player {} has a new high score of {} on turn {}",
-                current_player_number,
-                current_space,
-                number_to_pretty_string(game.turn_count)
-            );
-            game.players[current_player_number].high_score = current_space;
-            save_game(game, path);
-        }
-
-        let mut collision = false;
-        for player in game.players.iter_mut() {
-            if player.current_space == current_space && player.current_space != 0 {
-                log::debug!("Two players collided on space {}!", current_space);
-                player.current_space = 0;
-                current_space = 0;
-                collision = true;
-            }
-        }
-
-        if !collision {
-            if roll_d6() == 5 {
-                log::debug!(
-                    "Player {} rolled a 5 again on turn {} gets to stay on space {}",
+        if roll_d6() == 5 {
+            current_space += 1;
+            if current_space == BOARD_SIZE + 1 {
+                log::error!(
+                    "Player {} has reached the Finish space and won on turn {}!",
                     current_player_number,
-                    number_to_pretty_string(game.turn_count),
-                    current_space
+                    number_to_pretty_string(game.turn_count)
                 );
-            } else {
-                log::debug!(
+                break;
+            }
+
+            if current_space > game.players[current_player_number].high_score {
+                log::info!(
+                    "Player {} has a new high score of {} on turn {}",
+                    current_player_number,
+                    current_space,
+                    number_to_pretty_string(game.turn_count)
+                );
+                game.players[current_player_number].high_score = current_space;
+                save_game(game, path);
+            }
+
+            let mut collision = false;
+            for player in game.players.iter_mut() {
+                if player.current_space == current_space && player.current_space != 0 {
+                    log::debug!("Two players collided on space {}!", current_space);
+                    player.current_space = 0;
+                    current_space = 0;
+                    collision = true;
+                }
+            }
+
+            if !collision {
+                if roll_d6() == 5 {
+                    log::debug!(
+                        "Player {} rolled a 5 again on turn {} gets to stay on space {}",
+                        current_player_number,
+                        number_to_pretty_string(game.turn_count),
+                        current_space
+                    );
+                } else {
+                    log::debug!(
                     "Player {} rolled a non-5 after rolling a 5 on turn {} and goes back to Start",
                     current_player_number,
                     game.turn_count
                 );
-                current_space = 0;
+                    current_space = 0;
+                }
             }
+            game.players[current_player_number].current_space = current_space;
         }
 
-        game.players[current_player_number].current_space = current_space;
         log::debug!(
             "Player {} ends turn {} on space {}",
             current_player_number,
@@ -181,7 +175,20 @@ fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
 
         if do_save.load(Ordering::SeqCst) {
             save_game(game, path);
-            log::error!("{:#?}", *game);
+            log::error!("SIGINT received, saving and exiting.");
+            log::warn!(
+                "Current state, as of turn {}:",
+                number_to_pretty_string(game.turn_count)
+            );
+            let mut i = 0;
+            for player in game.players.iter() {
+                log::warn!(
+                    "Player {:?} is currently on space {}. Their high score is {}.",
+                    { let tmp = i; i += 1; tmp },
+                    player.current_space,
+                    player.high_score
+                );
+            }
             exit(0);
         }
     }
