@@ -183,7 +183,7 @@ fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
             let mut i = 0;
             for player in game.players.iter() {
                 log::warn!(
-                    "Player {:?} is currently on space {}. Their high score is {}.",
+                    "Player {} is currently on space {}. Their high score is {}.",
                     { let tmp = i; i += 1; tmp },
                     player.current_space,
                     player.high_score
