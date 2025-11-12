@@ -158,7 +158,7 @@ fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
                     log::debug!(
                     "Player {} rolled a non-5 after rolling a 5 on turn {} and goes back to Start",
                     current_player_number,
-                    game.turn_count
+                    number_to_pretty_string(game.turn_count)
                 );
                     current_space = 0;
                 }
