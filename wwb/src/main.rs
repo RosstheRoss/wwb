@@ -28,10 +28,19 @@ fn load_game(path: &str) -> Game {
     match fs::read(path) {
         Ok(serialized_game) => {
             let (game, _): (Game, usize) =
-                bincode::decode_from_slice(&serialized_game, BINCODE_CONFIG).unwrap();
+                bincode::decode_from_slice(&serialized_game, BINCODE_CONFIG).unwrap_or_else(|e| {
+                    log::error!("Cannot decode from save file. Starting from scratch: {}", e);
+                    (Game::default(), 1)
+                });
             game
         }
-        Err(_) => Game::default(),
+        Err(e) => {
+            log::error!(
+                "Save file does not exist or cannot be read, starting from scratch: {}",
+                e
+            );
+            Game::default()
+        }
     }
 }
 
@@ -42,11 +51,17 @@ fn save_game(game: &Game, path: &str) {
     if path.is_empty() {
         return;
     }
-    let serialized_game = bincode::encode_to_vec(game, BINCODE_CONFIG).expect("Cannot encode to binary. Panicking!");
-    match fs::write(path, serialized_game) {
-        Ok(_) => {},
-        Err(err) => {
-            log::error!("Cannot write to file. Full error: {}", err);
+    let serialized_game = bincode::encode_to_vec(game, BINCODE_CONFIG);
+    match serialized_game {
+        Ok(s) => match fs::write(path, s) {
+            Ok(_) => {}
+            Err(e) => {
+                log::error!("Cannot write to file: {}", e);
+                log::error!("Game State: {:#?}", game);
+            }
+        },
+        Err(e) => {
+            log::error!("Cannot encode to binary, cannot save: {}", e);
             log::error!("Game State: {:#?}", game);
         }
     }
@@ -97,8 +112,7 @@ fn main() {
     ctrlc::set_handler(move || {
         save_clone.store(true, Ordering::SeqCst);
     })
-    // If the handler cannot be set, panicking is intended.
-    .expect("Error setting Ctrl-C handler");
+    .expect("Error setting Ctrl-C handler"); // Unrecoverable
 
     game_loop(&mut game, &path, &save);
 }
@@ -191,7 +205,11 @@ fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
             for player in game.players.iter() {
                 log::warn!(
                     "Player {} is currently on space {}. Their high score is {}.",
-                    { let tmp = i; i += 1; tmp },
+                    {
+                        let tmp = i;
+                        i += 1;
+                        tmp
+                    },
                     player.current_space,
                     player.high_score
                 );
