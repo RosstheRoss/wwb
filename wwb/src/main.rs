@@ -42,8 +42,14 @@ fn save_game(game: &Game, path: &str) {
     if path.is_empty() {
         return;
     }
-    let serialized_game = bincode::encode_to_vec(game, BINCODE_CONFIG).unwrap();
-    fs::write(path, serialized_game).unwrap();
+    let serialized_game = bincode::encode_to_vec(game, BINCODE_CONFIG).expect("Cannot encode to binary. Panicking!");
+    match fs::write(path, serialized_game) {
+        Ok(_) => {},
+        Err(err) => {
+            log::error!("Cannot write to file. Full error: {}", err);
+            log::error!("Game State: {:#?}", game);
+        }
+    }
 }
 
 /// This unholy abomination is used to turn a number like 10000 to "10,000".
@@ -56,7 +62,7 @@ fn number_to_pretty_string(number: u128) -> String {
         .rev()
         .map(std::str::from_utf8)
         .collect::<Result<Vec<&str>, _>>()
-        .unwrap()
+        .unwrap_or([].to_vec())
         .join(",")
 }
 
@@ -91,6 +97,7 @@ fn main() {
     ctrlc::set_handler(move || {
         save_clone.store(true, Ordering::SeqCst);
     })
+    // If the handler cannot be set, panicking is intended.
     .expect("Error setting Ctrl-C handler");
 
     game_loop(&mut game, &path, &save);
