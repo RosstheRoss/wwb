@@ -16,7 +16,6 @@ pub struct Game {
 
 #[derive(Encode, Decode, Debug, Default, PartialEq)]
 pub struct Player {
-    // name: String,
     /// The current space the player is on. The default game board is a 1D array of 100 spaces.
     pub current_space: u16,
     /// The best space they have ever been on.

@@ -4,4 +4,4 @@ RUSTFLAGS="-C target-cpu=native" cargo build --release
 
 echo "-- New session started $(date --iso-8601=seconds) --" >> output.log
 nice -n 19 ./target/release/wwb game.bin | tee -ai output.log
-echo "-- End session started $(date --iso-8601=seconds) --" >> output.log
+echo "-- Session ended $(date --iso-8601=seconds) --" >> output.log

@@ -14,6 +14,7 @@ use wwb::*;
 static BINCODE_CONFIG: config::Configuration = config::standard();
 
 /// Roll a d6 and return the result.
+#[inline]
 fn roll_d6() -> u8 {
     fastrand::u8(1..=6)
 }
@@ -69,6 +70,7 @@ fn save_game(game: &Game, path: &str) {
 
 /// This unholy abomination is used to turn a number like 10000 to "10,000".
 /// Thank you, random person on StackOverflow.
+#[inline]
 fn number_to_pretty_string(number: u128) -> String {
     number
         .to_string()
@@ -110,7 +112,7 @@ fn main() {
     let save_clone = Arc::clone(&save);
 
     ctrlc::set_handler(move || {
-        save_clone.store(true, Ordering::SeqCst);
+        save_clone.store(true, Ordering::Relaxed);
     })
     .expect("Error setting Ctrl-C handler"); // Unrecoverable
 
@@ -194,7 +196,7 @@ fn game_loop(game: &mut Game, path: &str, do_save: &AtomicBool) {
             current_space
         );
 
-        if do_save.load(Ordering::SeqCst) {
+        if do_save.load(Ordering::Relaxed) {
             save_game(game, path);
             log::error!("SIGINT received, saving and exiting.");
             log::warn!(
