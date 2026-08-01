@@ -1,6 +1,6 @@
 use bincode::{Decode, Encode};
 
-/// WWB is a 2-player game at heart. Hardcode 2 players only so no one else has to suffer
+/// W.W.B is a 2-player game at heart. Hardcode 2 players only so no one else has to suffer
 pub const PLAYER_COUNT: usize = 2;
 /// By default, the game board is 100 cards, not including the start and finish spaces.
 /// An alternative rule would be to set this to be 1000, but since the game has never been finished at 100, it's not worth it.
@@ -11,7 +11,7 @@ pub struct Game {
     /// We're going to need an insanely large number for the turn count. Previous attempts crashed at trillions of turns.
     pub turn_count: u128,
     /// The players of this "game".
-    pub players: [Player; PLAYER_COUNT],
+    pub players: [Player; PLAYER_COUNT as usize],
 }
 
 #[derive(Encode, Decode, Debug, Default, PartialEq)]

@@ -36,7 +36,7 @@ This program is single-threaded as the collision detection mechanic requires the
 
 #### Exact info
 
-The exact information of the game was on turn 114,022,500,564,116 Player 0 had a top score of 17 while Player 1 also had a top score of 17.
+The exact information of the game was on turn 442,470,842,136,282 Player 0 had a top score of 18 while Player 1 also had a top score of 17.
 
 ## Usage
 
